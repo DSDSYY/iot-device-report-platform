@@ -15,7 +15,7 @@
     <artifactId>iot-device-report-platform</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>iot-device-report-platform</name>
-    <description>IoT 设备数据上报平台（校招简历项目）</description>
+    <description>IoT 设备数据上报平台：面向物联网设备的高并发数据接入与查询服务</description>
 
     <properties>
         <java.version>17</java.version>
