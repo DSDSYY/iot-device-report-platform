@@ -1,0 +1,89 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: iot-device-report-platform
+
+  # ---------------- 数据源 ----------------
+  # 默认连独立库 iot_platform（先执行 sql/iot_platform_schema.sql 初始化）
+  # 本地无 root 权限演示时，可用 --spring.datasource.url 覆盖到已有库
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/iot_platform?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: iot
+    # 本地演示默认值；生产请用环境变量注入：DB_USERNAME / DB_PASSWORD
+    password: ${DB_PASSWORD:iot123}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+  # ---------------- Redis（db1，与秒杀演示 db0 隔离） ----------------
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 1
+      lettuce:
+        pool:
+          max-active: 32
+          max-idle: 16
+          min-idle: 4
+          max-wait: 3s
+
+  # ---------------- RabbitMQ ----------------
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 200
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000ms
+          multiplier: 2.0
+          max-interval: 10000ms
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+# ---------------- MyBatis-Plus ----------------
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# ---------------- 业务自定义配置 ----------------
+iot:
+  report:
+    # 单次批量上报上限（条）
+    batch-max: 200
+    # 设备消息幂等去重 Key 的 TTL（秒），防止去重集合无限膨胀
+    dedup-ttl-seconds: 86400
+  rate-limit:
+    # 单设备令牌桶：容量（突发上限）
+    capacity: 100
+    # 每秒补充令牌数 = 单设备稳态上报速率上限
+    refill-per-second: 100
+  latest-cache:
+    # 最新状态缓存 TTL（秒），Cache-Aside 兜底回源
+    ttl-seconds: 60
+
+logging:
+  level:
+    com.example.iot: debug

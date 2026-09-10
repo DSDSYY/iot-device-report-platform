@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.iot.mapper.DeviceMapper">
+
+    <!-- 上报成功后更新冗余字段：最近上报时间 + 在线状态 -->
+    <!-- 只允许"最近上报时间"前进：
+         异步批次可能乱序到达，若无条件覆盖，后到的旧批次会把时间回退，
+         导致"设备最新状态"错乱。这里用 IF 做条件推进，天然幂等。 -->
+    <update id="updateLastReport">
+        UPDATE device
+        SET last_report_time = IF(last_report_time IS NULL
+                                  OR #{reportTime} > last_report_time,
+                                  #{reportTime}, last_report_time),
+            status           = 1,
+            update_time      = NOW()
+        WHERE device_no = #{deviceNo}
+          AND deleted = 0
+    </update>
+
+</mapper>
