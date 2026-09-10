@@ -22,3 +22,6 @@ Thumbs.db
 # local secrets
 .env
 application-local.yml
+# local github token (never commit)
+.gh_token.txt
+*.token.txt
