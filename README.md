@@ -63,7 +63,7 @@ iot-device-report-platform
 ```powershell
 # 1) 初始化数据库（只需一次；需 root 密码，自动建 iot_platform 库 + iot/iot123 账号 + 3 台演示设备）
 mysql -uroot -p < sql\iot_platform_schema.sql
-# 或: mysql -uroot -p -e "SOURCE D:/CodexProjects/iot-device-report-platform/sql/iot_platform_schema.sql"
+# 或: mysql -uroot -p -e "SOURCE /path/to/iot-device-report-platform/sql/iot_platform_schema.sql"
 
 # 2) 启动中间件
 scripts\start-redis.cmd
@@ -118,7 +118,7 @@ curl -X POST http://127.0.0.1:8090/api/device/report \
 4. **防回退**：异步批次可能乱序到达，`last_report_time` 和"最新状态缓存"都**只允许时间前进**（DB 用 `IF` 条件更新，缓存先比较再覆盖）。
 5. **失败可追踪**：消费失败自动重试 3 次，仍失败进死信队列，供人工/对账处理。
 
-## 八、本地实测数据（诚实标注：开发机 + 模拟数据）
+## 八、本地实测数据（开发机环境）
 
 | 指标 | 数值 | 说明 |
 |---|---|---|
